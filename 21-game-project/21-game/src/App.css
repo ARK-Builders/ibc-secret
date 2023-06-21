@@ -30,3 +30,7 @@ html, body {
   top: 50%;
   left: 20%;
 }
+.walletconnect{
+  float: right;
+  padding-right: 5px;
+}
