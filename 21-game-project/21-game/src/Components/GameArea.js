@@ -18,8 +18,6 @@ let cardValues =  new Map([
 ]);
 
 
-let deck = ["6", "6", "6", "6", "7", "7", "7", "7", "8", "8", "8", "8", "9", "9", "9", "9", "10", "10", "10", "10", "J", "J", "J", "J", "Q", "Q", "Q", "Q", "K", "K", "K", "K", "A", "A", "A", "A"];
-
 export default class GameArea extends React.Component {
   constructor(props) {
     super(props);
@@ -54,7 +52,7 @@ export default class GameArea extends React.Component {
               curSumA += cardValues.get(tempCards[this.state.cardPosition + i]);
               this.setState({cardSummA: curSumA});
             }
-            else if((tempCards[this.state.cardPosition + i]) == 'A')
+            else if((tempCards[this.state.cardPosition + i]) === 'A')
             {
               curSumA = curSum + 11;
               this.setState({cardSummA: curSumA});
@@ -83,7 +81,10 @@ export default class GameArea extends React.Component {
   }
   enoughButtonClick() {
   	if(this.state.cardSumm < 19){
-  		this.setState({gameResult: "You Lost", isButtonDisabled: true});
+      if(this.state.cardSummA > 18 && this.state.cardSummA < 22)
+        this.setState({gameResult: "You Won", isButtonDisabled: true});
+      else
+  		  this.setState({gameResult: "You Lost", isButtonDisabled: true});
   	}
   	else
   		this.setState({gameResult: "You Won", isButtonDisabled: true});
@@ -96,6 +97,7 @@ export default class GameArea extends React.Component {
     this.setState({is_Game_started: false,
     	cardPosition: 0,
     	cardSumm: 0,
+      cardSummA: 0,
     	cards: ["cardBack", "cardBack"],
     	gameResult: " ",
     	isButtonDisabled: false
