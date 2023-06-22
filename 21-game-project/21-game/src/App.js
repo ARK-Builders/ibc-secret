@@ -1,6 +1,7 @@
 import './App.css';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import GameArea from "./Components/GameArea";
+import Header from "./Components/Header";
+import Footer from "./Components/Footer";
 import React, { useState, useEffect } from 'react';
 
 const App = () => {
@@ -49,8 +50,10 @@ const App = () => {
   };
 
   return (
-    <div className="App">
-      <GameArea handleConnectWallet={handleConnectWallet} address={address}/>
+    <div className="App cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
+      <Header handleConnectWallet={handleConnectWallet} address={address}/>
+      <GameArea />
+      <Footer />
     </div>
   );
 }

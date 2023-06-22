@@ -2,7 +2,6 @@ import React from "react";
 import StartGameButton from "./StartGameButton";
 import PlayingTable from "./PlayingTable";
 import socketIO from "socket.io-client"
-import Button from 'react-bootstrap/Button';
 
 const socket = socketIO.connect("http://localhost:4000")
 
@@ -110,17 +109,24 @@ export default class GameArea extends React.Component {
   }
 	render(){
 		return(
-		<>
-      <div className="walletconnect">
-        {this.props.address ?
-          <p>Wallet {this.props.address} connected</p>
-          :
-          <Button variant="primary" size="lg" onClick={this.props.handleConnectWallet} >Connect Wallet</Button>
-        }
-      </div>
+    <main role="main" className="inner cover">
+      {
+        this.state.is_Game_started ?
+        <></>
+        :
+          <>
+          <h1 className="cover-heading">Rules</h1>
+          <p className="lead">The whole deck consists of 36 cards.
+          Player receives 2 random cards from the dealer.
+          Player can request new cards until they stop or lose.
+          If sum of card values is greater than 21 then they lose.
+          If sum of card values is lower than 19 then they lose.
+          If sum of card values is 19, 20 or 21 then they win.</p>
+          </>
+      }
 			<StartGameButton is_Game_started={this.state.is_Game_started} startGameButtonClick={this.startGameButtonClick}/>
 			<PlayingTable is_Game_started={this.state.is_Game_started} getDeckButtonClick={this.getDeckButtonClick} enoughButtonClick={this.enoughButtonClick} menuTableButtonClick={this.menuTableButtonClick} oneMoreButtonClick={this.oneMoreButtonClick} cardSumm={this.state.cardSumm} cardSummA={this.state.cardSummA} cards={this.state.cards} gameResult ={this.state.gameResult} isButtonDisabled={this.state.isButtonDisabled}/>
-		</>
+		</main>
 		);
 	}
 }

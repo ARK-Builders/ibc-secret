@@ -1,5 +1,4 @@
 import React from "react";
-import Button from 'react-bootstrap/Button';
 
 export default class StartGameButton extends React.Component {
   constructor(props) {
@@ -14,9 +13,9 @@ render(){
 	if(!this.props.is_Game_started){
 		return(
 			<div className="StartGame">
-	  			<div className="vertical-center">
-	  				<Button variant="primary" size="lg" onClick={this.props.startGameButtonClick}>Start Game</Button>
-	  			</div>
+	  			<p className="lead">
+	  				<button type="button" className="btn btn-lg btn-secondary" onClick={this.props.startGameButtonClick}>Start Game</button>
+	  			</p>
 	  		</div>
 			);
 		}
