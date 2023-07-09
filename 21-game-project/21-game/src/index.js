@@ -4,11 +4,14 @@ import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 
+// Contexts
+import { SecretjsContextProvider } from "./secretJs/SecretjsContext";
+
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  <SecretjsContextProvider>
     <App />
-  </React.StrictMode>
+  </SecretjsContextProvider>
 );
 
 // If you want to start measuring performance in your app, pass a function

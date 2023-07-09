@@ -2,57 +2,25 @@ import './App.css';
 import GameArea from "./Components/GameArea";
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
-import React, { useState, useEffect } from 'react';
+import { SecretjsContext } from "./secretJs/SecretjsContext";
+import React, {useContext, useState } from 'react';
+import { SecretjsFunctions } from "./secretJs/SecretjsFunctions";
 
 const App = () => {
   const [address, setaddress] = useState(null);
-
-    useEffect(() => {
-    const fetchBalance = async () => {
-      if (window.keplr) {
-        // Check if Keplr extension is installed
-        if (window.getOfflineSigner) {
-          // Check if the Keplr extension is loaded
-          const keplr = window.getOfflineSigner('cosmoshub-4'); // Replace with your chain ID
-
-          try {
-            // Get the address of the connected wallet
-            const accounts = await keplr.getAccounts();
-
-            setaddress(accounts[0].address);
-
-          } catch (error) {
-            console.error('Error fetching address:', error);
-          }
-        } else {
-          console.error('Keplr extension not loaded');
-        }
-      } else {
-        console.error('Keplr extension not installed');
-      }
-    };
-
-    fetchBalance();
-  }, []);
+  const { connectWallet } = useContext(SecretjsContext);
+    const { submit_net_worth, create_deck, query_2cards, query_card, query_deck, query_win } =
+    SecretjsFunctions();
 
     const handleConnectWallet = async () => {
-    if (window.keplr) {
-      try {
-      const keplr = window.getOfflineSigner('cosmoshub-4');
-      const accounts = await keplr.getAccounts(); // Replace with your chain ID
-      setaddress(accounts[0].address);
-      } catch (error) {
-            console.error('Error fetching address:', error);
-          }
-    } else {
-      console.error('Keplr extension not installed');
-    }
+      setaddress(await connectWallet());
   };
+
 
   return (
     <div className="App cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
       <Header handleConnectWallet={handleConnectWallet} address={address}/>
-      <GameArea />
+      <GameArea  create_deck={create_deck} query_2cards = {query_2cards} query_card = {query_card} query_deck = {query_deck} query_win = {query_win}/>
       <Footer />
     </div>
   );

@@ -16,15 +16,15 @@ import cardA  from './A.jpg';
 let cardArray = new Map();
 
 cardArray["cardBack"] = cardBack;
-cardArray["6"] = card6;
-cardArray["7"] = card7;
-cardArray["8"] = card8;
-cardArray["9"] = card9;
-cardArray["10"] = card10;
-cardArray["J"] = cardJ;
-cardArray["Q"] = cardQ;
-cardArray["K"] = cardK;
-cardArray["A"] = cardA;
+cardArray[0] = card6;
+cardArray[1] = card7;
+cardArray[2] = card8;
+cardArray[3] = card9;
+cardArray[4] = card10;
+cardArray[5] = cardJ;
+cardArray[6] = cardQ;
+cardArray[7] = cardK;
+cardArray[8] = cardA;
 
 function CardRender(props) {
 	if(props.cardName === " ")
