@@ -3,12 +3,16 @@ use serde::{Deserialize, Serialize};
 
 use cosmwasm_std::{Addr, Storage};
 use cosmwasm_storage::{singleton, singleton_read, ReadonlySingleton, Singleton};
+use secret_toolkit::storage::Keymap;
+
 
 pub static CONFIG_KEY: &[u8] = b"config";
 
+pub static SECRET_ADDRESS: Keymap<String, Vec<u8>> = Keymap::new(b"secret address");
+
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct State {
-    pub flip: u8,
+    pub deck: Vec<u8>,
     pub owner: Addr,
 }
 
