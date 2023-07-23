@@ -8,13 +8,13 @@ const wallet = new secretjsimported.Wallet(process.env.MNEMONIC);
 const contract_wasm = fs.readFileSync("../contract.wasm.gz");
 
 const secretjs = new secretjsimported.SecretNetworkClient({
-  chainId: "pulsar-2",
-  url: "https://api.pulsar.scrttestnet.com",
+  chainId: "pulsar-3",
+  url: "https://api.pulsar3.scrttestnet.com",
   wallet: wallet,
   walletAddress: wallet.address,
 });
 
-/*
+
 let upload_contract = async () => {
   let tx = await secretjs.tx.compute.storeCode(
     {
@@ -42,12 +42,12 @@ let upload_contract = async () => {
   
 };
 
-upload_contract();
-*/
+// upload_contract();
 
-let codeId = 22345;
-let contractCodeHash = "e2f9f21300d512f013610dd73cbd965a8a7620a49b558f42038f153719eac2d0";
-let contract_address = "secret185znckt6tayjpj02svchxjd0ycxj6xuyqj68gu";
+
+let codeId = 39;
+let contractCodeHash = "4ce7fed73b4460cc57351c43f582eccdada65a137587fe606e3f260b81c70a71";
+let contract_address = "secret1wppm2l27vpkaxmuyym6ag6w7f3qqhrrpeypqhm";
 
 
 let instantiate_contract = async () => {
@@ -77,29 +77,29 @@ let instantiate_contract = async () => {
     }
 };
 
-instantiate_contract();
+// instantiate_contract();
 
 
-let try_query_count = async () => {
+let try_query = async () => {
   try {
   const my_query = await secretjs.query.compute.queryContract({
     contract_address: contract_address,
     code_hash: contractCodeHash,
-    query: { get_deck: {} },
+    query: { get_deck: {wallet: "secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6"} },
   });
 
-  console.log(my_query);
+  await console.log(my_query);
   return my_query;
   } catch (error) {
   console.error(error);
     }
 };
 
-try_query_count();
+ try_query();
 
 
 
-let try_increment_count = async () => {
+let build_deck = async () => {
   try {
     let tx = await secretjs.tx.compute.executeContract(
       {
@@ -114,34 +114,11 @@ let try_increment_count = async () => {
         gasLimit: 100_000,
       }
     );
-    console.log("fliping...");
+    await console.log("deck_built...");
     } catch (error) {
   console.error(error);
     }
 };
 
 
-let deck = ["6", "6", "6", "6", "7", "7", "7", "7", "8", "8", "8", "8", "9", "9", "9", "9", "10", "10", "10", "10", "J", "J", "J", "J", "Q", "Q", "Q", "Q", "K", "K", "K", "K", "A", "A", "A", "A"];
-
-
-
-
-let temp = [...deck];
-
-/*
-let create_Deck = async () => {
-  for(let i = 0; i < 36; i++)
-    {
-      await try_increment_count();
-      let smth = await try_query_count();
-      let randIndex = Math.floor(smth.flip % temp.length);
-      deck[i] = temp[randIndex];
-      temp.splice(randIndex, 1);
-      console.log(deck);
-    }
-}
-
-create_Deck();
-
-console.log(deck);
-*/
+// build_deck();

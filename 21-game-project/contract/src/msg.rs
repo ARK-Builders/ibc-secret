@@ -10,15 +10,17 @@ pub struct InstantiateMsg {
 #[serde(rename_all = "snake_case")]
 pub enum ExecuteMsg {
     Deck {},
+    Increment {},
+    Enough {},
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 #[serde(rename_all = "snake_case")]
 pub enum QueryMsg {
-    GetDeck {},
-    Get2Cards {},
-    GetCard { idx: u8},
-    CheckWin { idx: u8},
+    GetDeck { wallet: String },
+    Get2Cards { wallet: String },
+    GetCard { wallet: String },
+    CheckWin { wallet: String },
 }
 // We define a custom struct for each query response
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
@@ -29,4 +31,9 @@ pub struct DeckResponse {
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
 pub struct ResultResponse {
     pub result: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq, Eq, JsonSchema)]
+pub struct CardResponse {
+    pub card: u8,
 }

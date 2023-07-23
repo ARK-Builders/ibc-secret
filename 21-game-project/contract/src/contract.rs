@@ -3,8 +3,10 @@ use cosmwasm_std::{
 };
 
 use crate::error::ContractError;
-use crate::msg::{ExecuteMsg, DeckResponse, ResultResponse, InstantiateMsg, QueryMsg};
-use crate::state::{config, config_read, State, SECRET_ADDRESS};
+use crate::msg::{ExecuteMsg, DeckResponse, CardResponse, ResultResponse, InstantiateMsg, QueryMsg};
+use crate::state::{config, State, ADDRESSES};
+
+
 
 
 #[entry_point]
@@ -17,6 +19,10 @@ pub fn instantiate(
     let state = State {
         deck: msg.deck,
         owner: info.sender.clone(),
+        index: 2,
+        card_sum: 0,
+        card_sum_with_ace: 0,
+        is_player_lost: false,
     };
 
     config(deps.storage).save(&state)?;
@@ -35,79 +41,123 @@ pub fn execute(
     msg: ExecuteMsg,
 ) -> Result<Response, ContractError> {
     match msg {
-        ExecuteMsg::Deck {} => build_deck(deps, env),
+        ExecuteMsg::Deck {} => build_deck(deps, env, _info),
+        ExecuteMsg::Increment {} => increment_index(deps, _info),
+        ExecuteMsg::Enough {} => enough_cards(deps, _info),
     }
 }
 
-pub fn build_deck(deps: DepsMut, env: Env) -> Result<Response, ContractError> {
-        let address = SECRET_ADDRESS
-        .add_suffix("secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6".as_bytes());
+pub fn build_deck(deps: DepsMut, env: Env, _info: MessageInfo) -> Result<Response, ContractError> {
         let mut cards: Vec<u8> = vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8];
         let rnd_vec = env.block.random.unwrap().0;
         let mut tempdeck: Vec<u8> = Vec::new();
+
+        tempdeck.push(0); //is_game_finished
+        tempdeck.push(6); //index 
+        tempdeck.push(0); //card_sum  
+        tempdeck.push(0); //card_sum_with_ace
+
         for i in 0..32 {
             let temp:usize = rnd_vec[i] as usize;
             let index:usize = temp % cards.len();
             tempdeck.push(cards[index]);
             cards.remove(index);
         }
-        address.insert(deps.storage, &("secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6".to_string()), &tempdeck)?;
+
+        let values: Vec<u8> = vec![6, 7, 8, 9, 10, 2, 3, 4, 1];
+        for i in 4..6 {
+            if tempdeck[3] > 0
+            {
+                tempdeck[3] += values[tempdeck[i] as usize];
+            }
+            else if tempdeck[i] == 8 {
+                tempdeck[3] += tempdeck[2] + 11;
+            }
+            tempdeck[2] += values[tempdeck[i] as usize];
+        }
+
+        ADDRESSES.insert(deps.storage, &(_info.sender.clone().to_string()), &tempdeck)?;
     Ok(Response::default())
 }
 
+pub fn increment_index(deps: DepsMut, _info: MessageInfo) -> Result<Response, ContractError> {
+    let mut deck = ADDRESSES.get(deps.storage, &(_info.sender.clone().to_string())).unwrap_or(vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]);
+    if deck[0] == 0
+    {    
+        let values: Vec<u8> = vec![6, 7, 8, 9, 10, 2, 3, 4, 1];
+        if deck[0] == 0
+        {
+            if deck[3] > 0
+            {
+                deck[3] += values[deck[deck[1] as usize] as usize];
+            }
+            else if deck[deck[1] as usize] == 8 {
+                deck[3] += deck[2] + 11;
+            }
+        }
+        if deck[2] + values[deck[deck[1] as usize] as usize] > 21
+        {
+           deck[0] = 1;
+        }
+        deck[2] += values[deck[deck[1] as usize] as usize];
+        deck[1] += 1;
+        ADDRESSES.insert(deps.storage, &(_info.sender.clone().to_string()), &deck)?;
+    }
+    Ok(Response::default())
+}
 
+pub fn enough_cards(deps: DepsMut, _info: MessageInfo) -> Result<Response, ContractError> {
+    let mut deck = ADDRESSES.get(deps.storage, &(_info.sender.clone().to_string())).unwrap_or(vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]);
+    deck[0] = 1;
+    ADDRESSES.insert(deps.storage, &(_info.sender.clone().to_string()), &deck)?;
+    Ok(Response::default())
+}
 
 
 
 #[entry_point]
 pub fn query(deps: Deps, _env: Env, msg: QueryMsg) -> StdResult<Binary> {
     match msg {
-        QueryMsg::GetDeck {} => to_binary(&query_deck(deps)?),
-        QueryMsg::Get2Cards {} => to_binary(&query_2cards(deps)?),
-        QueryMsg::GetCard { idx } => to_binary(&query_card(deps, idx)?),
-        QueryMsg::CheckWin { idx } => to_binary(&check_win(deps, idx)?),
+        QueryMsg::GetDeck {wallet} => to_binary(&query_deck(deps, wallet)?),
+        QueryMsg::Get2Cards {wallet} => to_binary(&query_2cards(deps, wallet)?),
+        QueryMsg::GetCard {wallet} => to_binary(&query_card(deps, wallet)?),
+        QueryMsg::CheckWin {wallet} => to_binary(&check_win(deps, wallet)?),
     }
 }
 
-fn query_deck(deps: Deps) -> StdResult<DeckResponse> {
-    let address = SECRET_ADDRESS
-        .add_suffix("secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6".as_bytes());
-    let mut deck = (address.get(deps.storage, &("secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6".to_string()))).unwrap_or(vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]);
-    Ok(DeckResponse { deck: deck })
+fn query_deck(deps: Deps, wallet: String) -> StdResult<DeckResponse> {
+    let result;
+    let deck = (ADDRESSES.get(deps.storage, &(wallet))).unwrap_or(vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]);
+    if deck[0] == 1 || deck[2] > 21
+    {
+        result = deck;
+    }
+    else
+    {
+        result = vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8];
+    }
+    Ok(DeckResponse { deck: result })
 }
 
 
-fn query_2cards(deps: Deps) -> StdResult<DeckResponse> {
-    let state = config_read(deps.storage).load()?;
-    let tempdeck: Vec<u8> = vec![state.deck[0], state.deck[1]];
-    Ok(DeckResponse { deck: tempdeck })
+fn query_2cards(deps: Deps, wallet: String) -> StdResult<DeckResponse> {
+    let deck = (ADDRESSES.get(deps.storage, &(wallet))).unwrap_or(vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]);
+    Ok(DeckResponse { deck: vec![deck[4], deck[5]] })
 }
 
-fn query_card(deps: Deps, idx: u8) -> StdResult<DeckResponse> {
-    let state = config_read(deps.storage).load()?;
-    let tempdeck: Vec<u8> = vec![state.deck[idx as usize]];
-    Ok(DeckResponse { deck: tempdeck })
+
+fn query_card(deps: Deps, wallet: String) -> StdResult<CardResponse> {
+    let deck = (ADDRESSES.get(deps.storage, &(wallet))).unwrap_or(vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]);
+    Ok(CardResponse { card: deck[deck[1] as usize - 1]})
 }
 
-fn check_win(deps: Deps, idx: u8) -> StdResult<ResultResponse> {
-    let state = config_read(deps.storage).load()?;
+
+
+
+fn check_win(deps: Deps, wallet: String) -> StdResult<ResultResponse> {
     let mut result = String::from("You lost");
-    let values: Vec<u8> = vec![6, 7, 8, 9, 10, 2, 3, 4, 1];
-    let mut sum : u8 = 0;
-    let mut sum_a : u8 = 0;
-    let index = idx as usize;
-    for i in 0..index {
-            if sum_a > 0
-            {
-                sum_a += values[state.deck[i] as usize];
-            }
-            else if state.deck[i] == 8
-            {
-                sum_a += sum + 11;
-            }
-            sum += values[state.deck[i] as usize];
-    }
-    if (sum > 18 && sum < 22) || (sum_a > 18 && sum_a < 22)
+    let  deck = (ADDRESSES.get(deps.storage, &(wallet))).unwrap_or(vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8]);
+    if (deck[2] > 18 && deck[2] < 22) || (deck[3] > 18 && deck[3] < 22)
     {
         result = String::from("You Won");
     }
@@ -119,7 +169,7 @@ fn check_win(deps: Deps, idx: u8) -> StdResult<ResultResponse> {
 mod tests {
     use super::*;
     use cosmwasm_std::testing::*;
-    use cosmwasm_std::{from_binary, Coin, StdError, Uint128};
+    use cosmwasm_std::{from_binary, Coin, Uint128};
 
 
     #[test]
@@ -143,7 +193,7 @@ mod tests {
 
         // anyone can increment
         let info = mock_info(
-            "anyone",
+            "secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6",
             &[Coin {
                 denom: "token".to_string(),
                 amount: Uint128::new(2),
@@ -154,7 +204,7 @@ mod tests {
         let _res = execute(deps.as_mut(), mock_env(), info, exec_msg).unwrap();
 
         // should increase counter by 1
-        let res = query(deps.as_ref(), mock_env(), QueryMsg::GetDeck {}).unwrap();
+        let res = query(deps.as_ref(), mock_env(), QueryMsg::GetDeck {wallet: "secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6".to_string()}).unwrap();
         let value: DeckResponse = from_binary(&res).unwrap();
         for i in 0..32 {
             println!("{}", value.deck[i]);
@@ -162,7 +212,7 @@ mod tests {
 
         println!("2 cards");
 
-        let res2 = query(deps.as_ref(), mock_env(), QueryMsg::Get2Cards {}).unwrap();
+        let res2 = query(deps.as_ref(), mock_env(), QueryMsg::Get2Cards {wallet: "secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6".to_string()}).unwrap();
         let value2: DeckResponse = from_binary(&res2).unwrap();
         for i in 0..2 {
             println!("{}", value2.deck[i]);
