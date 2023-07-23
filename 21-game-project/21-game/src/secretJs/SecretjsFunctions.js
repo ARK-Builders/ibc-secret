@@ -3,8 +3,8 @@ import { MsgExecuteContract } from "secretjs";
 import { SecretjsContext } from "./SecretjsContext";
 
 let contractCodeHash =
-  "4ce7fed73b4460cc57351c43f582eccdada65a137587fe606e3f260b81c70a71";
-let contractAddress = "secret1wppm2l27vpkaxmuyym6ag6w7f3qqhrrpeypqhm";
+  "49d13faf7812c11efa07a131303725b7c78a045e8895f40519a5b3ad3ec4de21";
+let contractAddress = "secret1az0h2gg0f3mwu00hgyksnqkxnv36zyszczvvlk";
 
 const SecretjsFunctions = () => {
   const { secretjs, secretAddress } = useContext(SecretjsContext);
