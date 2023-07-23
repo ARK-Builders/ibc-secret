@@ -71,10 +71,11 @@ export default class GameArea extends React.Component {
   oneMoreButtonClick = async () => {
     let temp = [];
         try {
-          await this.props.query_card(temp, this.state.cardPosition);
+          await this.props.increment();
+          await this.props.query_card(temp, this.props.address);
           console.log("kurwa");
-          console.log(temp[0].deck);
-          this.addcards(temp[0].deck);
+          console.log(temp[0].card);
+          this.addcards([temp[0].card]);
         } catch (error) {
             alert("Please connect your wallet by selecting the wallet icon.");
           }
@@ -83,7 +84,8 @@ export default class GameArea extends React.Component {
   enoughButtonClick = async () => {
   	    let temp = [];
         try {
-          await this.props.query_win(temp, this.state.cardPosition);
+          await this.props.enough_cards();
+          await this.props.query_win(temp, this.props.address);
           console.log(temp[0].result);
           this.setState({gameResult: temp[0].result, isButtonDisabled: true});
         } catch (error) {
@@ -95,7 +97,7 @@ export default class GameArea extends React.Component {
     let temp = [];
     try {
           await this.props.create_deck();
-          await this.props.query_2cards(temp);
+          await this.props.query_2cards(temp, this.props.address);
           this.setState({is_Game_started: true});
           console.log(temp[0].deck);
           this.addcards(temp[0].deck);
@@ -117,7 +119,9 @@ export default class GameArea extends React.Component {
   getDeckButtonClick = async () => {
     let temp = [];
     try {
-          await this.props.query_deck(temp);
+          await this.props.query_deck(temp, this.props.address);
+          temp[0].deck.splice(0, 4);
+          console.log(temp[0].deck);
           this.setState({cards: temp[0].deck});
           console.log(temp[0].deck);
         } catch (error) {
