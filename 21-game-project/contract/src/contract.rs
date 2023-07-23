@@ -14,15 +14,10 @@ pub fn instantiate(
     deps: DepsMut,
     _env: Env,
     info: MessageInfo,
-    msg: InstantiateMsg,
+    _msg: InstantiateMsg,
 ) -> Result<Response, StdError> {
     let state = State {
-        deck: msg.deck,
         owner: info.sender.clone(),
-        index: 2,
-        card_sum: 0,
-        card_sum_with_ace: 0,
-        is_player_lost: false,
     };
 
     config(deps.storage).save(&state)?;
@@ -186,8 +181,8 @@ mod tests {
             }],
         );
 
-        let  cards: Vec<u8> = vec![0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8];
-        let init_msg = InstantiateMsg { deck: cards  };
+
+        let init_msg = InstantiateMsg {   };
 
         let _res = instantiate(deps.as_mut(), mock_env(), info, init_msg).unwrap();
 

@@ -45,15 +45,15 @@ let upload_contract = async () => {
 // upload_contract();
 
 
-let codeId = 39;
-let contractCodeHash = "4ce7fed73b4460cc57351c43f582eccdada65a137587fe606e3f260b81c70a71";
-let contract_address = "secret1wppm2l27vpkaxmuyym6ag6w7f3qqhrrpeypqhm";
+let codeId = 40;
+let contractCodeHash = "49d13faf7812c11efa07a131303725b7c78a045e8895f40519a5b3ad3ec4de21";
+let contract_address = "secret1az0h2gg0f3mwu00hgyksnqkxnv36zyszczvvlk";
 
 
 let instantiate_contract = async () => {
   try {
   // Create an instance of the Counter contract, providing a starting count
-  const initMsg = { deck: [5, 6, 7, 8, 6] };
+  const initMsg = {  };
   let tx = await secretjs.tx.compute.instantiateContract(
     {
       code_id: codeId,
