@@ -2,8 +2,8 @@ import { createContext, useState } from "react";
 import { SecretNetworkClient } from "secretjs";
 
 const SecretjsContext = createContext(null);
-const SECRET_CHAIN_ID = "pulsar-3";
-const SECRET_LCD = "https://api.pulsar3.scrttestnet.com";
+const SECRET_CHAIN_ID = "secret-4";
+const SECRET_LCD = "https://lcd.secret.express";
 
 
 const SecretjsContextProvider = ({ children }) => {
