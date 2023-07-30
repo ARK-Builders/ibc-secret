@@ -13,6 +13,56 @@ const App = () => {
     SecretjsFunctions();
 
     const handleConnectWallet = async () => {
+      try { 
+        await window.keplr.experimentalSuggestChain({
+          chainId: "secret-4",
+          chainName: "Secret Network",
+          rpc: "https://rpc.secret.express",
+          rest: "https://lcd.secret.express",
+          bip44: {
+              coinType: 118,
+          },
+          bech32Config: {
+              bech32PrefixAccAddr: "secret",
+              bech32PrefixAccPub: "secret" + "pub",
+              bech32PrefixValAddr: "secret" + "valoper",
+              bech32PrefixValPub: "secret" + "valoperpub",
+              bech32PrefixConsAddr: "secret" + "valcons",
+              bech32PrefixConsPub: "secret" + "valconspub",
+          },
+          currencies: [ 
+              { 
+                  coinDenom: "SCRT", 
+                  coinMinimalDenom: "uscrt", 
+                  coinDecimals: 6, 
+                  coinGeckoId: "secret", 
+              }, 
+          ],
+          feeCurrencies: [
+              {
+                  coinDenom: "SCRT",
+                  coinMinimalDenom: "uscrt",
+                  coinDecimals: 6,
+                  gasPriceStep: {
+                      low: 0.01,
+                      average: 0.025,
+                      high: 0.04,
+                  },
+              },
+          ],
+          stakeCurrency: {
+              coinDenom: "SCRT",
+              coinMinimalDenom: "uscrt",
+              coinDecimals: 6,
+              coinGeckoId: "secret", 
+          },
+      });
+
+    } catch (error) {
+      alert(
+        "An error occurred while adding network. Please try again."
+      );
+    }
       setaddress(await connectWallet());
   };
 
