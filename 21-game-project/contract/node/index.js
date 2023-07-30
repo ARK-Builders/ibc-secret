@@ -7,9 +7,11 @@ const wallet = new secretjsimported.Wallet(process.env.MNEMONIC);
 
 const contract_wasm = fs.readFileSync("../contract.wasm.gz");
 
+const WALLET = "secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6";
+
 const secretjs = new secretjsimported.SecretNetworkClient({
-  chainId: "pulsar-3",
-  url: "https://api.pulsar3.scrttestnet.com",
+  chainId: "secret-4",
+  url: "https://lcd.secret.express",
   wallet: wallet,
   walletAddress: wallet.address,
 });
@@ -45,15 +47,15 @@ let upload_contract = async () => {
 // upload_contract();
 
 
-let codeId = 40;
+let codeId = 1039;
 let contractCodeHash = "49d13faf7812c11efa07a131303725b7c78a045e8895f40519a5b3ad3ec4de21";
-let contract_address = "secret1az0h2gg0f3mwu00hgyksnqkxnv36zyszczvvlk";
+let contract_address = "secret1tytl2wp3a2ce5ryq007k9vf7qn37gqul066730";
 
 
 let instantiate_contract = async () => {
   try {
   // Create an instance of the Counter contract, providing a starting count
-  const initMsg = {  };
+  const initMsg = { deck: [5, 6, 7, 8, 6] };
   let tx = await secretjs.tx.compute.instantiateContract(
     {
       code_id: codeId,
@@ -85,7 +87,7 @@ let try_query = async () => {
   const my_query = await secretjs.query.compute.queryContract({
     contract_address: contract_address,
     code_hash: contractCodeHash,
-    query: { get_deck: {wallet: "secret1grgcderf32vn8zpcy3fu3k96cxaffynrncyjf6"} },
+    query: { get_deck: {wallet: WALLET} },
   });
 
   await console.log(my_query);
